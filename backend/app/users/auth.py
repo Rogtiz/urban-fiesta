@@ -7,7 +7,7 @@ from fastapi import Depends, HTTPException, Request, Response, status, WebSocket
 from app.config import settings
 from app.users.dao import UsersDAO
 
-from async_lru import alru_cache
+# from async_lru import alru_cache
 
 
 SECRET_KEY = settings.SECRET_KEY
