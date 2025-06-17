@@ -27,7 +27,7 @@ class FileDAO(BaseDAO):
     @classmethod
     async def get_file_versions(cls, file_id):
         async with async_session_maker() as session:
-            stmt = select(FileVersion).where(FileVersion.file_id == file_id)
+            stmt = select(FileVersion).where(FileVersion.file_id == file_id).order_by(FileVersion.created_at.desc())
             result = await session.execute(stmt)
             return result.scalars().all()
         
@@ -43,6 +43,13 @@ class FileDAO(BaseDAO):
         async with async_session_maker() as session:
             await session.execute(update(FileVersion).where(FileVersion.id == version_id).values(created_at=datetime.utcnow()))
             await session.commit()
+
+    @classmethod
+    async def get_files_project(cls, file_id):
+        async with async_session_maker() as session:
+            stmt = select(ProjectFile).where(ProjectFile.file_id == file_id)
+            result = await session.execute(stmt)
+            return result.scalars().all()
     
 class FileVersionDAO(BaseDAO):
     model = FileVersion
