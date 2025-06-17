@@ -46,6 +46,20 @@ def verify_email_confirmation_token(token: str) -> Optional[dict]:
         return payload
     except JWTError:
         return None
+
+
+def create_telegram_token(user) -> str:
+    expire = datetime.utcnow() + timedelta(hours=24)
+    data = {"sub": user.email, "username": user.username, "exp": expire}
+    return jwt.encode(data, SECRET_KEY, algorithm=ALGORITHM)
+
+
+def verify_telegram_token(token: str) -> Optional[dict]:
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return payload
+    except JWTError:
+        return None
     
 
 async def get_token(request: Request, response: Response):
