@@ -39,7 +39,7 @@ class FileDAO(BaseDAO):
             return result.scalar_one_or_none()
         
     @classmethod
-    async def set_main_version(version_id):
+    async def set_main_version(cls, version_id):
         async with async_session_maker() as session:
             await session.execute(update(FileVersion).where(FileVersion.id == version_id).values(created_at=datetime.utcnow()))
             await session.commit()
