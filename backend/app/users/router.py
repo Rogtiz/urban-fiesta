@@ -178,3 +178,47 @@ async def get_user_collaborators(user_id: int, user: Users = Depends(get_current
         "description": found_user.description,
         "tags": [tag.name for tag in await TagsDAO.get_user_tags(found_user.id)]
     }
+
+@router.get("/telegram_token")
+async def get_telegram_token(user: Users = Depends(get_current_user)):
+    if not user.telegram_id:
+        raise HTTPException(status_code=404, detail="Telegram ID not found")
+    
+    token = create_telegram_token(user)
+    
+    return {"telegram_token": token}
+
+
+@router.get("/telegram_verify")
+async def verify_telegram_token_route(token: str):
+    payload = verify_telegram_token(token)
+    if not payload:
+        raise HTTPException(status_code=400, detail="Invalid token")
+    
+    user = await UsersDAO.find_by_email(payload.get("sub"))
+    if not user:
+        raise HTTPException(status_code=400, detail="User not found")
+    
+    await UsersDAO.update(user.id, telegram_id=payload.get("telegram_id"))
+
+    return {"Info": "Telegram ID verified successfully"}
+
+
+@router.put("/set_telegram_id")
+async def set_telegram_id(telegram_id: int, user_email: int):
+    user = await UsersDAO.find_by_email(user_email)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    await UsersDAO.update(user.id, telegram_id=telegram_id)
+
+    return {"Info": "Telegram ID set successfully"}
+
+
+@router.get("by_telegram/{telegram_id}")
+async def get_user_by_telegram_id(telegram_id: int):
+    user = await UsersDAO.find_one_or_none(telegram_id=telegram_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return user
