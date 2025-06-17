@@ -27,7 +27,7 @@ export default function FileVersionsPage() {
 
   const makeVersionMain = async (versionId) => {
     try {
-      await api.post(`/files/version/${versionId}`);
+      await api.put(`/files/version/${versionId}`);
       await loadVersions();
       alert("Версия сделана основной");
     } catch (err) {
@@ -38,15 +38,15 @@ export default function FileVersionsPage() {
   return (
     <div className="p-6 space-y-4">
       <h1 className="text-2xl font-bold">Версии файла: {file?.filename}</h1>
-      <Link to={`/editor/${file?.project_id}/${file?.id}`} className="text-blue-500 underline text-sm">
-        ← Вернуться к редактору
+      <Link to={`/projects/${file?.project_id}`} className="text-blue-500 underline text-sm">
+        ← Вернуться к проекту
       </Link>
 
       {versions.length === 0 ? (
         <p className="text-sm text-gray-500">Пока нет сохранённых версий.</p>
       ) : (
         <ul className="space-y-4">
-          {versions.map((v) => (
+          {versions.map((v, index) => (
             <li key={v.id} className="border p-4 rounded bg-gray-100">
               <p><strong>Дата:</strong> {new Date(v.created_at).toLocaleString()}</p>
               <p><strong>Описание:</strong> {v.description}</p>
@@ -58,12 +58,14 @@ export default function FileVersionsPage() {
                 >
                   ⬇️ Скачать
                 </a>
-                <button
-                  onClick={() => makeVersionMain(v.id)}
-                  className="bg-green-600 text-white px-3 py-1 rounded text-sm"
-                >
-                  Сделать основной
-                </button>
+                {index !== 0 && (
+                  <button
+                    onClick={() => makeVersionMain(v.id)}
+                    className="bg-green-600 text-white px-3 py-1 rounded text-sm"
+                  >
+                    Сделать основной
+                  </button>
+                )}
               </div>
             </li>
           ))}
