@@ -39,7 +39,16 @@ async def get_file_by_id(file_id: int, user: Users = Depends(get_current_user)):
     found_file = await FileDAO.find_by_id(file_id)
     if not found_file:
         raise HTTPException(status_code=404, detail="File not found in database")
-    return found_file
+    print(f"Found file: {found_file.filename} at {found_file.path}")
+    files_project = await FileDAO.get_files_project(found_file.id)
+    result = {
+        "id": found_file.id,
+        "filename": found_file.filename,
+        "path": found_file.path,
+        "project_id": files_project[0].project_id,
+        "created_at": found_file.created_at,
+    }
+    return result
 
 
 @router.get("/{file_id}/read", response_class=PlainTextResponse)
